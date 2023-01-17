@@ -22,11 +22,10 @@ let binomial_tests = [
   ((1, 0), 1);
 ]
 
-let rec factorial n =
-  if n <= 1 then 1 else n * factorial (n - 1)
-
 let binomial n k =
-  factorial n / (factorial k * factorial (n - k))
+  let rec factorial n =
+    if n <= 1 then 1 else n * factorial (n - 1)
+  in factorial n / (factorial k * factorial (n - k))
 
 (* Question 3: Lucas Numbers *)
 

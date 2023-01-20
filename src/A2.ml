@@ -56,8 +56,8 @@ let rec q2c_pow (e1 : exp) (p : nat) : exp =
 (* Question 3 *)
 
 let eval_tests : ((float * exp) * float) list = [
-  ((1.0, Var), 1.0);
   ((1.0, Const 2.0), 2.0);
+  ((1.0, Var), 1.0);
   ((2.0, Plus(Var, Div(Const 2.0, Times(Var, Const 1.0)))), 3.0);
   ((-2.0, Plus(Var, Div(Const 2.0, Times(Var, Const 1.0)))), -3.0)
 ]
@@ -72,8 +72,18 @@ let rec eval (a : float) (e : exp) : float =
 
 (* Question 4 *)
 
-(* TODO: Write a good set of tests for {!diff_tests}. *)
-let diff_tests : (exp * exp) list = []
+let diff_tests : (exp * exp) list = [
+  (Const 1.0, Const 0.0);
+  (Var, Const 1.0);
+  (Plus(Var, Var), Plus (Const 1.0, Const 1.0));
+  (Times(Var, Var), Plus (Times (Const 1.0, Var), Times (Var, Const 1.0)));
+  (Div(Var, Var), Div (Plus (Times (Const 1.0, Var), q2a_neg (Times (Var, Const 1.0))), Times (Var, Var)));
+]
 
-(* TODO: Implement {!diff}. *)
-let rec diff (e : exp) : exp = raise Not_implemented
+let rec diff (e : exp) : exp =
+  match e with
+  | Const _ -> Const 0.0
+  | Var -> Const 1.0
+  | Plus (lhs, rhs) -> Plus (diff lhs, diff rhs)
+  | Times (lhs, rhs) -> Plus (Times (diff lhs, rhs), Times (lhs, diff rhs))
+  | Div (lhs, rhs) -> Div (Plus (Times (diff lhs, rhs), q2a_neg (Times (lhs, diff rhs))), Times (rhs, rhs))

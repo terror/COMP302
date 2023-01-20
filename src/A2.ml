@@ -6,7 +6,7 @@ let q1a_nat_of_int_tests : (int * nat) list = [
   (5, S (S (S (S (S Z)))))
 ]
 
-let rec q1a_nat_of_int (n : int) : nat =
+let q1a_nat_of_int (n : int) : nat =
   let rec aux n acc =
     match n with
     | 0 -> acc
@@ -55,11 +55,20 @@ let rec q2c_pow (e1 : exp) (p : nat) : exp =
 
 (* Question 3 *)
 
-(* TODO: Write a good set of tests for {!eval}. *)
-let eval_tests : ((float * exp) * float) list = []
+let eval_tests : ((float * exp) * float) list = [
+  ((1.0, Var), 1.0);
+  ((1.0, Const 2.0), 2.0);
+  ((2.0, Plus(Var, Div(Const 2.0, Times(Var, Const 1.0)))), 3.0);
+  ((-2.0, Plus(Var, Div(Const 2.0, Times(Var, Const 1.0)))), -3.0)
+]
 
-(* TODO: Implement {!eval}. *)
-let rec eval (a : float) (e : exp) : float = raise Not_implemented
+let rec eval (a : float) (e : exp) : float =
+  match e with
+  | Const x -> x
+  | Var -> a
+  | Plus (lhs, rhs) -> eval a lhs +. eval a rhs
+  | Times (lhs, rhs) -> eval a lhs *. eval a rhs
+  | Div (lhs, rhs) -> eval a lhs /. eval a rhs
 
 (* Question 4 *)
 

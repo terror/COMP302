@@ -63,6 +63,14 @@ let rec eval (a : float) (e : exp) : float =
 let diff_tests : (exp * exp) list =
   [ (Const 1.0, Const 0.0)
   ; (Var, Const 1.0)
+  ; ( Div (Times (Var, Const (-1.0)), Const 0.0)
+    , Div
+        ( Plus
+            ( Times
+                ( Plus (Times (Const 1., Const (-1.)), Times (Var, Const 0.))
+                , Const 0. )
+            , Times (Times (Times (Var, Const (-1.)), Const 0.), Const (-1.)) )
+        , Times (Const 0., Const 0.) ) )
   ; (Plus (Var, Var), Plus (Const 1.0, Const 1.0))
   ; (Times (Var, Var), Plus (Times (Const 1.0, Var), Times (Var, Const 1.0)))
   ; ( Div (Var, Var)

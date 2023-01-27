@@ -25,18 +25,22 @@ let mult_tests : (('b church * 'b church) * 'b church) list =
   ; ( ((fun s z -> s (s z)), fun s z -> s (s (s z)))
     , fun s z -> s (s (s (s (s (s z))))) ) ]
 
-let mult (n1 : 'b church) (n2 : 'b church) : 'b church = raise NotImplemented
+let mult (n1 : 'b church) (n2 : 'b church) : 'b church = fun s z -> n1 (n2 s) z
 
 (* Question 2a *)
 
-let is_even_tests : ('b church * bool) list = []
+let is_even_tests : ('b church * bool) list =
+  [ ((fun _ z -> z), true)
+  ; ((fun s z -> s z), false)
+  ; ((fun s z -> s (s z)), true) ]
 
-let is_even (n : 'b church) : bool = raise NotImplemented
+let is_even (n : 'b church) : bool = n (fun x -> x + 1) 0 mod 2 = 0
 
-(* Question 2b: Generate a list whose length is given by a church numeral with
-   one element over and over *)
-(* TODO: Test cases;
- * You only need to test lists of int here. *)
-let gen_list_tests : (('b church * int) * int list) list = []
+(* Question 2b *)
+
+let gen_list_tests : (('b church * int) * int list) list =
+  [ (((fun _ z -> z), 0), [])
+  ; (((fun s z -> s z), 0), [0])
+  ; (((fun s z -> s (s z)), 0), [0; 0]) ]
 
 let gen_list (n : 'b church) (x : 'a) : 'a list = raise NotImplemented

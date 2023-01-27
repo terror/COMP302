@@ -34,7 +34,7 @@ let is_even_tests : ('b church * bool) list =
   ; ((fun s z -> s z), false)
   ; ((fun s z -> s (s z)), true) ]
 
-let is_even (n : 'b church) : bool = n (fun x -> x + 1) 0 mod 2 = 0
+let is_even (n : 'b church) : bool = n (fun x -> not x) true
 
 (* Question 2b *)
 
@@ -43,4 +43,4 @@ let gen_list_tests : (('b church * int) * int list) list =
   ; (((fun s z -> s z), 0), [0])
   ; (((fun s z -> s (s z)), 0), [0; 0]) ]
 
-let gen_list (n : 'b church) (x : 'a) : 'a list = raise NotImplemented
+let gen_list (n : 'b church) (x : 'a) : 'a list = n (fun x' -> x :: x') []

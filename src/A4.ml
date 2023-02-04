@@ -19,7 +19,7 @@ let tree_depth_cps (t : 'a tree) =
     | Empty ->
         sc 0
     | Tree (l, _, r) ->
-        max (helper l (fun x -> sc (x + 1))) (helper r (fun x -> sc (x + 1)))
+        helper l (fun a -> helper r (fun b -> sc (1 + max a b)))
   in
   helper t (fun x -> x)
 
@@ -27,7 +27,11 @@ let tree_depth_cps (t : 'a tree) =
 
 (* TODO: Write a good set of tests for testing your tree traversal function. *)
 
-let traverse_tests : (int tree * int list) list = []
+let traverse_tests : (int tree * int list) list =
+  [ (Empty, [])
+  ; (Tree (Tree (Empty, 2, Empty), 1, Tree (Empty, 3, Empty)), [2; 3; 1])
+  ; ( Tree (Tree (Empty, 2, Empty), 1, Tree (Empty, 3, Tree (Empty, 4, Empty)))
+    , [2; 4; 3; 1] ) ]
 
 (* TODO: Implement a CPS style postorder traversal function. *)
 

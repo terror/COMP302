@@ -45,6 +45,8 @@ let traverse (tree : 'a tree) : 'a list =
 
 let get_distances_tests : (int tree * int list) list =
   [ (Empty, [])
+  ; (Tree (Tree (Empty, 2, Empty), 1, Empty), [3; 1])
+  ; (Tree (Empty, 1, Tree (Empty, 2, Empty)), [3; 1])
   ; (Tree (Tree (Empty, 2, Empty), 1, Tree (Empty, 3, Empty)), [3; 4; 1])
   ; ( Tree (Tree (Empty, 2, Empty), 1, Tree (Empty, 3, Tree (Empty, 4, Empty)))
     , [3; 8; 4; 1] ) ]
@@ -53,11 +55,12 @@ let get_distances (tree : int tree) : int list =
   let rec helper tree sum sc =
     match tree with
     | Empty ->
-        sc sum
+        sc ()
     | Tree (l, x, r) ->
-        helper l (x + sum) (fun x -> helper r x (fun y -> x :: sc y))
+        helper l (x + sum) (fun () ->
+            helper r (x + sum) (fun () -> (x + sum) :: sc ()) )
   in
-  helper tree 0 (fun _ -> [])
+  helper tree 0 (fun () -> [])
 
 (* Question 3: Finding Subtrees *)
 

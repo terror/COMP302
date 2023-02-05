@@ -50,13 +50,30 @@ let get_distances_tests : (int tree * int list) list =
     , [3; 8; 4; 1] ) ]
 
 let get_distances (tree : int tree) : int list =
-  let rec helper tree sum sc = raise NotImplemented in
-  raise NotImplemented
+  let rec helper tree sum sc =
+    match tree with
+    | Empty ->
+        sc sum
+    | Tree (l, x, r) ->
+        helper l (x + sum) (fun x -> helper r x (fun y -> x :: sc y))
+  in
+  helper tree 0 (fun _ -> [])
 
 (* Question 3: Finding Subtrees *)
 
 let find_subtree_cps_tests : ((int list * int tree) * int tree option) list =
-  [ (* Your test cases go here *) ]
+  [ (([], Empty), Some Empty)
+  ; (([1], Empty), None)
+  ; ( ([1], Tree (Tree (Empty, 2, Empty), 1, Tree (Empty, 3, Empty)))
+    , Some (Tree (Empty, 2, Empty)) )
+  ; ( ( [1; 3]
+      , Tree (Tree (Empty, 2, Empty), 1, Tree (Empty, 3, Tree (Empty, 4, Empty)))
+      )
+    , Some Empty )
+  ; ( ( [1; 3]
+      , Tree (Tree (Empty, 2, Empty), 1, Tree (Tree (Empty, 4, Empty), 3, Empty))
+      )
+    , Some (Tree (Empty, 4, Empty)) ) ]
 
 let find_subtree_cps ls tree =
   let rec helper ls tree sc fc = raise NotImplemented in

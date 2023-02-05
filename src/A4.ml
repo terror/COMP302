@@ -43,7 +43,11 @@ let traverse (tree : 'a tree) : 'a list =
 
 (* Question 2(b): Distances from the Root *)
 
-let get_distances_tests : (int tree * int list) list = []
+let get_distances_tests : (int tree * int list) list =
+  [ (Empty, [])
+  ; (Tree (Tree (Empty, 2, Empty), 1, Tree (Empty, 3, Empty)), [3; 4; 1])
+  ; ( Tree (Tree (Empty, 2, Empty), 1, Tree (Empty, 3, Tree (Empty, 4, Empty)))
+    , [3; 8; 4; 1] ) ]
 
 let get_distances (tree : int tree) : int list =
   let rec helper tree sum sc = raise NotImplemented in

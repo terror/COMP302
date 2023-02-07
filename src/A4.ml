@@ -52,16 +52,16 @@ let get_distances_tests : (int tree * int list) list =
     , [3; 8; 4; 1] ) ]
 
 let get_distances (tree : int tree) : int list =
-  let rec helper (tree : int tree) (sum : int) (sc : unit -> int list) :
-      int list =
+  let rec helper (tree : int tree) (sum : int) (sc : int list -> 'r) : int list
+      =
     match tree with
     | Empty ->
-        sc ()
+        sc []
     | Tree (l, x, r) ->
-        helper l (x + sum) (fun () ->
-            helper r (x + sum) (fun () -> (x + sum) :: sc ()) )
+        helper l (x + sum) (fun a ->
+            helper r (x + sum) (fun b -> sc (a @ b @ [x + sum])) )
   in
-  helper tree 0 (fun () -> [])
+  helper tree 0 (fun x -> x)
 
 (* Question 3: Finding Subtrees *)
 

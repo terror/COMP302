@@ -6,15 +6,15 @@ let tree_depth_cps_tests : (int tree * int) list =
   ; ( Tree (Tree (Empty, 2, Empty), 1, Tree (Empty, 3, Tree (Empty, 4, Empty)))
     , 3 ) ]
 
-let rec tree_depth t =
+let rec tree_depth (t : int tree) =
   match t with
   | Empty ->
       0
   | Tree (l, _, r) ->
       1 + max (tree_depth l) (tree_depth r)
 
-let tree_depth_cps (t : 'a tree) =
-  let rec helper (t : 'a tree) (sc : int -> int) =
+let tree_depth_cps (t : 'a tree) : int =
+  let rec helper (t : 'a tree) (sc : int -> int) : int =
     match t with
     | Empty ->
         sc 0
@@ -32,14 +32,14 @@ let traverse_tests : (int tree * int list) list =
     , [2; 4; 3; 1] ) ]
 
 let traverse (tree : 'a tree) : 'a list =
-  let rec helper (tree : 'a tree) (sc : unit -> 'a list) =
+  let rec helper (tree : 'a tree) (sc : 'a list -> 'r) : 'r =
     match tree with
     | Empty ->
-        sc ()
+        sc []
     | Tree (l, x, r) ->
-        helper l (fun () -> helper r (fun () -> x :: sc ()))
+        helper l (fun a -> helper r (fun b -> sc (a @ b @ [x])))
   in
-  helper tree (fun () -> [])
+  helper tree (fun x -> x)
 
 (* Question 2(b): Distances from the Root *)
 
@@ -52,7 +52,8 @@ let get_distances_tests : (int tree * int list) list =
     , [3; 8; 4; 1] ) ]
 
 let get_distances (tree : int tree) : int list =
-  let rec helper tree sum sc =
+  let rec helper (tree : int tree) (sum : int) (sc : unit -> int list) :
+      int list =
     match tree with
     | Empty ->
         sc ()

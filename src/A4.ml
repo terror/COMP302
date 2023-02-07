@@ -70,6 +70,8 @@ let find_subtree_cps_tests : ((int list * int tree) * int tree option) list =
   ; (([1], Empty), None)
   ; ( ([1], Tree (Tree (Empty, 2, Empty), 1, Tree (Empty, 3, Empty)))
     , Some (Tree (Empty, 2, Empty)) )
+  ; ( ([], Tree (Tree (Empty, 2, Empty), 1, Tree (Empty, 3, Empty)))
+    , Some (Tree (Tree (Empty, 2, Empty), 1, Tree (Empty, 3, Empty))) )
   ; ( ( [1; 3]
       , Tree (Tree (Empty, 2, Empty), 1, Tree (Empty, 3, Tree (Empty, 4, Empty)))
       )
@@ -79,6 +81,17 @@ let find_subtree_cps_tests : ((int list * int tree) * int tree option) list =
       )
     , Some (Tree (Empty, 4, Empty)) ) ]
 
-let find_subtree_cps ls tree =
-  let rec helper ls tree sc fc = raise NotImplemented in
-  raise NotImplemented
+let rec find_subtree_cps (ls : 'a list) (tree : 'a tree) : 'r option =
+  match (tree, ls) with
+  | (Empty | Tree (_, _, _)), [] ->
+      Some tree
+  | Tree (l, x, _), [x'] when x = x' ->
+      Some l
+  | Tree (l, x, r), x' :: xs when x = x' -> (
+    match find_subtree_cps xs l with
+    | None ->
+        find_subtree_cps xs r
+    | Some x ->
+        Some x )
+  | (Empty | Tree (_, _, _)), _ :: _ ->
+      None

@@ -23,12 +23,65 @@ let collect_variables (formula : formula) : Variable_set.t =
 
 (* Question 2 *)
 
-let eval_success_tests : ((truth_assignment * formula) * bool) list = []
+let make_map values =
+  let rec aux values acc =
+    match values with
+    | [] ->
+        acc
+    | (a, b) :: xs ->
+        aux xs (Variable_map.add a b acc)
+  in
+  aux values Variable_map.empty
 
-let eval_failure_tests : ((truth_assignment * formula) * exn) list = []
+let eval_success_tests : ((truth_assignment * formula) * bool) list =
+  [ ( ( make_map [("foo", true); ("bar", false); ("baz", true)]
+      , Negation
+          (Conjunction
+             ( Variable "foo"
+             , Disjunction
+                 ( Variable "bar"
+                 , Conjunction (Variable "baz", Negation (Variable "foo")) ) )
+          ) )
+    , true )
+  ; ( ( make_map [("foo", true); ("bar", true); ("baz", true)]
+      , Negation
+          (Conjunction
+             ( Variable "foo"
+             , Disjunction
+                 ( Variable "bar"
+                 , Conjunction (Variable "baz", Negation (Variable "foo")) ) )
+          ) )
+    , false ) ]
 
-let eval (state : truth_assignment) (formula : formula) : bool =
-  raise Not_implemented
+let eval_failure_tests : ((truth_assignment * formula) * exn) list =
+  [ ( ( make_map [("foo", true); ("bar", false)]
+      , Negation
+          (Conjunction
+             ( Variable "foo"
+             , Disjunction
+                 ( Variable "bar"
+                 , Conjunction (Variable "baz", Negation (Variable "foo")) ) )
+          ) )
+    , Unassigned_variable "baz" ) ]
+
+let rec eval (state : truth_assignment) (formula : formula) : bool =
+  match formula with
+  | Variable v -> (
+    match Variable_map.find_opt v state with
+    | Some result ->
+        result
+    | None ->
+        raise (Unassigned_variable v) )
+  | Conjunction (a, b) ->
+      let lhs = eval state a in
+      let rhs = eval state b in
+      lhs && rhs
+  | Disjunction (a, b) ->
+      let lhs = eval state a in
+      let rhs = eval state b in
+      lhs || rhs
+  | Negation a ->
+      not (eval state a)
 
 (* Question 3 *)
 

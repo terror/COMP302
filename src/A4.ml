@@ -1,3 +1,5 @@
+type 'a tree = Empty | Tree of 'a tree * 'a * 'a tree
+
 (* Question 1: Tree Depth *)
 
 let tree_depth_cps_tests : (int tree * int) list =

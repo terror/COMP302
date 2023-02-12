@@ -1,3 +1,5 @@
+type 'b church = ('b -> 'b) -> 'b -> 'b
+
 (* Question 1a *)
 
 let to_int_tests : (int church * int) list =

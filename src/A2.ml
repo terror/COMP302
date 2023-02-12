@@ -1,3 +1,12 @@
+type nat = Z | S of nat
+
+type exp =
+  | Const of float
+  | Var
+  | Plus of exp * exp
+  | Times of exp * exp
+  | Div of exp * exp
+
 (* Question 1 *)
 
 let q1a_nat_of_int_tests : (int * nat) list =

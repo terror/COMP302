@@ -1,4 +1,4 @@
-(* Question 1: Manhattan Distance *)
+(* Question 1 *)
 
 let distance_tests =
   [ (((2, 2), (2, 2)), 0)
@@ -9,7 +9,7 @@ let distance_tests =
 
 let distance (x1, y1) (x2, y2) = abs (x2 - x1) + abs (y2 - y1)
 
-(* Question 2: Binomial *)
+(* Question 2 *)
 
 let binomial_tests =
   [ ((3, 2), 3)
@@ -23,7 +23,7 @@ let binomial n k =
   let rec factorial n = if n <= 1 then 1 else n * factorial (n - 1) in
   factorial n / (factorial k * factorial (n - k))
 
-(* Question 3: Lucas Numbers *)
+(* Question 3 *)
 
 let lucas_tests = [(0, 2); (1, 1); (3, 4); (10, 123)]
 

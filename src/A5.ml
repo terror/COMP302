@@ -1,13 +1,15 @@
+let formula =
+  Negation
+    (Conjunction
+       ( Variable "foo"
+       , Disjunction
+           ( Variable "bar"
+           , Conjunction (Variable "baz", Negation (Variable "foo")) ) ) )
+
 (* Question 1 *)
 
 let collect_variables_tests : (formula * Variable_set.t) list =
-  [ ( Negation
-        (Conjunction
-           ( Variable "foo"
-           , Disjunction
-               ( Variable "bar"
-               , Conjunction (Variable "baz", Negation (Variable "foo")) ) ) )
-    , Variable_set.of_list ["foo"; "bar"; "baz"] ) ]
+  [(formula, Variable_set.of_list ["foo"; "bar"; "baz"])]
 
 let collect_variables (formula : formula) : Variable_set.t =
   let rec aux (f : formula) (sc : Variable_set.t -> Variable_set.t) =
@@ -31,34 +33,12 @@ let rec make_map (values : ('a * 'b) list) : 'b Variable_map.t =
       Variable_map.add a b (make_map xs)
 
 let eval_success_tests : ((truth_assignment * formula) * bool) list =
-  [ ( ( make_map [("foo", true); ("bar", false); ("baz", true)]
-      , Negation
-          (Conjunction
-             ( Variable "foo"
-             , Disjunction
-                 ( Variable "bar"
-                 , Conjunction (Variable "baz", Negation (Variable "foo")) ) )
-          ) )
-    , true )
-  ; ( ( make_map [("foo", true); ("bar", true); ("baz", true)]
-      , Negation
-          (Conjunction
-             ( Variable "foo"
-             , Disjunction
-                 ( Variable "bar"
-                 , Conjunction (Variable "baz", Negation (Variable "foo")) ) )
-          ) )
-    , false ) ]
+  [ ((make_map [("foo", true); ("bar", false); ("baz", true)], formula), true)
+  ; ((make_map [("foo", true); ("bar", true); ("baz", true)], formula), false)
+  ]
 
 let eval_failure_tests : ((truth_assignment * formula) * exn) list =
-  [ ( ( make_map [("foo", true); ("bar", false)]
-      , Negation
-          (Conjunction
-             ( Variable "foo"
-             , Disjunction
-                 ( Variable "bar"
-                 , Conjunction (Variable "baz", Negation (Variable "foo")) ) )
-          ) )
+  [ ( (make_map [("foo", true); ("bar", false)], formula)
     , Unassigned_variable "baz" ) ]
 
 let rec eval (state : truth_assignment) (formula : formula) : bool =

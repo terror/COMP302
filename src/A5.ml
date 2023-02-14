@@ -23,15 +23,12 @@ let collect_variables (formula : formula) : Variable_set.t =
 
 (* Question 2 *)
 
-let make_map (values : ('a * 'b) list) : 'b Variable_map.t =
-  let rec aux (values : ('a * 'b) list) (acc : 'b Variable_map.t) =
-    match values with
-    | [] ->
-        acc
-    | (a, b) :: xs ->
-        aux xs (Variable_map.add a b acc)
-  in
-  aux values Variable_map.empty
+let rec make_map (values : ('a * 'b) list) : 'b Variable_map.t =
+  match values with
+  | [] ->
+      Variable_map.empty
+  | (a, b) :: xs ->
+      Variable_map.add a b (make_map xs)
 
 let eval_success_tests : ((truth_assignment * formula) * bool) list =
   [ ( ( make_map [("foo", true); ("bar", false); ("baz", true)]

@@ -64,10 +64,12 @@ let rec eval (state : truth_assignment) (formula : formula) : bool =
 
 let find_satisfying_assignment_tests : (formula * truth_assignment option) list
     =
-  [ (Variable "foo", Some (make_map [("foo", true)]))
-  ; ( Negation (Conjunction (Variable "foo", Variable "bar"))
-    , Some (make_map [("foo", false); ("bar", false)]) )
-  ; (Conjunction (Variable "foo", Negation (Variable "foo")), None) ]
+  [ (formula, Some (make_map [("foo", true); ("bar", false); ("baz", true)]))
+  ; (Conjunction (Variable "foo", Negation (Variable "foo")), None)
+  ; ( Negation
+        (Disjunction
+           (Variable "foo", Disjunction (Variable "bar", Variable "baz")) )
+    , Some (make_map [("foo", false); ("bar", false); ("baz", false)]) ) ]
 
 let find_satisfying_assignment (formula : formula) : truth_assignment =
   let rec aux l (acc : truth_assignment) =

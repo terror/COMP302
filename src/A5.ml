@@ -23,8 +23,8 @@ let collect_variables (formula : formula) : Variable_set.t =
 
 (* Question 2 *)
 
-let make_map values =
-  let rec aux values acc =
+let make_map (values : ('a * 'b) list) : 'b Variable_map.t =
+  let rec aux (values : ('a * 'b) list) (acc : 'b Variable_map.t) =
     match values with
     | [] ->
         acc
@@ -87,7 +87,22 @@ let rec eval (state : truth_assignment) (formula : formula) : bool =
 
 let find_satisfying_assignment_tests : (formula * truth_assignment option) list
     =
-  []
+  [ (Variable "foo", Some (make_map [("foo", true)]))
+  ; ( Negation (Conjunction (Variable "foo", Variable "bar"))
+    , Some (make_map [("foo", false); ("bar", false)]) )
+  ; (Conjunction (Variable "foo", Negation (Variable "foo")), None) ]
 
 let find_satisfying_assignment (formula : formula) : truth_assignment =
-  raise Not_implemented
+  let rec aux l (acc : truth_assignment) =
+    match l with
+    | [] -> (
+      match eval acc formula with
+      | true ->
+          acc
+      | false ->
+          raise Unsatisfiable_formula )
+    | x :: xs -> (
+      try aux xs (Variable_map.add x true acc)
+      with Unsatisfiable_formula -> aux xs (Variable_map.add x false acc) )
+  in
+  aux (Variable_set.elements (collect_variables formula)) Variable_map.empty

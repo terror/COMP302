@@ -8,45 +8,41 @@ let string_implode (l : char list) : string =
 
 (* Q2 : Bank Account *)
 
-let check count =
-  match !count with
-  | 3 ->
-      raise account_locked
-  | _ ->
-      count := !count + 1 ;
-      raise wrong_pass
+type state = {password: string ref; count: int ref; balance: int ref}
 
-let update_pass password count old_pass new_pass =
-  match old_pass = !password with
+let verify (state : state) (candidate : password) (callback : unit -> 'a) : 'a =
+  match !(state.password) = candidate with
   | true ->
-      password := new_pass
-  | false ->
-      check count
+      callback ()
+  | false -> (
+    match !(state.count) with
+    | 3 ->
+        raise account_locked
+    | _ ->
+        state.count := !(state.count) + 1 ;
+        raise wrong_pass )
 
-let deposit password count balance pass amount =
-  match pass = !password with
-  | true ->
-      if amount < 0 then raise negative_amount else balance := !balance + amount
-  | false ->
-      check count
+let update_pass (state : state) (old_password : password)
+    (new_password : password) : unit =
+  verify state old_password (fun () -> state.password := new_password)
 
-let retrieve password count balance pass amount =
-  match pass = !password with
-  | true ->
-      if !balance - amount < 0 then raise not_enough_balance
+let deposit (state : state) (password : password) (amount : int) : unit =
+  verify state password (fun () ->
+      if amount < 0 then raise negative_amount
+      else state.balance := !(state.balance) + amount )
+
+let retrieve (state : state) (password : password) (amount : int) : unit =
+  verify state password (fun () ->
+      if !(state.balance) - amount < 0 then raise not_enough_balance
       else if amount < 0 then raise negative_amount
-      else balance := !balance - amount
-  | false ->
-      check count
+      else state.balance := !(state.balance) - amount )
 
-let show_balance password count balance pass =
-  match pass = !password with true -> !balance | false -> check count
+let show_balance (state : state) (password : password) : int =
+  verify state password (fun () -> !(state.balance))
 
-let open_account (pass : password) : bank_account =
-  let password = ref pass in
-  let balance = ref 0 in
-  let count = ref 0 in
-  { update_pass= update_pass password count
-  ; deposit= deposit password count balance
-  ; retrieve= retrieve password count balance
-  ; show_balance= show_balance password count balance }
+let open_account (password : password) : bank_account =
+  let state = {password= ref password; count= ref 0; balance= ref 0} in
+  { update_pass= update_pass state
+  ; deposit= deposit state
+  ; retrieve= retrieve state
+  ; show_balance= show_balance state }

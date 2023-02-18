@@ -4,7 +4,7 @@ let string_explode (s : string) : char list =
   tabulate (String.get s) (String.length s)
 
 let string_implode (l : char list) : string =
-  List.fold_right ( ^ ) (List.map (String.make 1) l) ""
+  List.fold_right ( ^ ) (List.map Char.escaped l) ""
 
 (* Q2 : Bank Account *)
 

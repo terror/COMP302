@@ -13,6 +13,7 @@ type state = {password: string ref; count: int ref; balance: int ref}
 let verify (state : state) (candidate : password) (callback : unit -> 'a) : 'a =
   match !(state.password) = candidate with
   | true ->
+      state.count := 0 ;
       callback ()
   | false -> (
     match !(state.count) with

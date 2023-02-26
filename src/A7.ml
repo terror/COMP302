@@ -5,7 +5,7 @@ let rec take (n : int) (s : 'a stream) : 'a list =
 
 (* Question 1.2 *)
 
-let rec lucas1 = int_stream_not_implemented
+let lucas1 = str_map fst (iterate (fun (a, b) -> (b, a + b)) (2, 1))
 
 (* Question 1.3 *)
 

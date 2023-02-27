@@ -20,11 +20,19 @@ let lucas : int stream = unfold (fun (a, b) -> (a, (b, a + b))) (2, 1)
 
 (* Question 2.1 *)
 
-let rec scale (s1 : int stream) (n : int) : int stream = raise NotImplemented
+let scale (s1 : int stream) (n : int) : int stream = str_map (fun x -> x * n) s1
 
 let rec merge (s1 : 'a stream) (s2 : 'a stream) : 'a stream =
-  raise NotImplemented
+  { head= (if s1.head < s2.head then s1.head else s2.head)
+  ; tail=
+      Susp
+        (fun () ->
+          if s1.head = s2.head then merge (force s1.tail) (force s2.tail)
+          else if s1.head < s2.head then merge (force s1.tail) s2
+          else merge s1 (force s2.tail) ) }
 
 (* Question 2.2 *)
 
-let rec s = int_stream_not_implemented
+let rec s =
+  { head= 1
+  ; tail= Susp (fun () -> merge (scale s 2) (merge (scale s 3) (scale s 5))) }

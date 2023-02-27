@@ -5,16 +5,18 @@ let rec take (n : int) (s : 'a stream) : 'a list =
 
 (* Question 1.2 *)
 
-let lucas1 = str_map fst (iterate (fun (a, b) -> (b, a + b)) (2, 1))
+let rec lucas1 = {head= 2; tail= Susp (fun () -> lucas2)}
+
+and lucas2 = {head= 1; tail= Susp (fun () -> add_streams lucas1 lucas2)}
 
 (* Question 1.3 *)
 
-let rec unfold (f : 'a -> 'b * 'a) (seed : 'a) : 'b stream =
-  raise NotImplemented
+let unfold (f : 'a -> 'b * 'a) (seed : 'a) : 'b stream =
+  str_map (fun x -> fst (f x)) (iterate (fun x -> snd (f x)) seed)
 
-(* Question 1.3 *)
+(* Question 1.4 *)
 
-let lucas : int stream = int_stream_not_implemented
+let lucas : int stream = unfold (fun (a, b) -> (a, (b, a + b))) (2, 1)
 
 (* Question 2.1 *)
 

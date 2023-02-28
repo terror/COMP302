@@ -1,3 +1,24 @@
+type 'a susp = Susp of (unit -> 'a)
+
+let force (s : 'a susp) : 'a =
+  let (Susp f) = s in
+  f ()
+
+type 'a stream = {head: 'a; tail: 'a stream susp}
+
+let rec add_streams (s1 : int stream) (s2 : int stream) : int stream =
+  { head= s1.head + s2.head
+  ; tail= Susp (fun () -> add_streams (force s1.tail) (force s2.tail)) }
+
+let susp_map (f : 'a -> 'b) (s : 'a susp) : 'b susp =
+  Susp (fun () -> f (force s))
+
+let rec str_map (f : 'a -> 'b) (s : 'a stream) : 'b stream =
+  {head= f s.head; tail= susp_map (str_map f) s.tail}
+
+let rec iterate (f : 'a -> 'a) (x : 'a) : 'a stream =
+  {head= x; tail= Susp (fun () -> iterate f (f x))}
+
 (* Question 1.1 *)
 
 let rec take (n : int) (s : 'a stream) : 'a list =

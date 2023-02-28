@@ -1,3 +1,24 @@
+exception Not_implemented
+
+type formula =
+  | Variable of string
+  | Conjunction of formula * formula
+  | Disjunction of formula * formula
+  | Negation of formula
+
+module Variable_set = Set.Make (String)
+module Variable_map = Map.Make (String)
+
+let variable_set_to_list = Variable_set.elements
+
+let variable_map_to_list = Variable_map.bindings
+
+type truth_assignment = bool Variable_map.t
+
+exception Unassigned_variable of string
+
+exception Unsatisfiable_formula
+
 let formula =
   Negation
     (Conjunction

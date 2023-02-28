@@ -1,3 +1,25 @@
+let rec tabulate f n =
+  let rec tab n acc = if n < 0 then acc else tab (n - 1) (f n :: acc) in
+  tab (n - 1) []
+
+exception Msg of string
+
+type password = string
+
+type bank_account =
+  { update_pass: password -> password -> unit
+  ; retrieve: password -> int -> unit
+  ; deposit: password -> int -> unit
+  ; show_balance: password -> int }
+
+let account_locked = Msg "Account locked, please contact bank"
+
+let negative_amount = Msg "Money amount below 0"
+
+let not_enough_balance = Msg "Insufficient balance"
+
+let wrong_pass = Msg "Wrong password"
+
 (* Q1 : String to Characters to String *)
 
 let string_explode (s : string) : char list =

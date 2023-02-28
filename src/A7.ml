@@ -33,6 +33,6 @@ let rec merge (s1 : 'a stream) (s2 : 'a stream) : 'a stream =
 
 (* Question 2.2 *)
 
-let rec s =
+let rec s : int stream =
   { head= 1
   ; tail= Susp (fun () -> merge (scale s 2) (merge (scale s 3) (scale s 5))) }

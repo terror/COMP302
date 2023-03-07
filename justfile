@@ -10,3 +10,7 @@ forbid:
 
 fmt:
   ocamlformat -i **/*.ml
+
+dev-deps:
+  brew install opam
+  opam install ocamlformat

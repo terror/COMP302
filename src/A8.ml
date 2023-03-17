@@ -31,20 +31,10 @@ let rec free_variables : exp -> name list =
 
 (* Question 2 *)
 
-(* Note: we've added a type annotation here so that the compiler can help you
-   write tests of the correct form. *)
 let subst_tests : (((exp * name) * exp) * exp) list =
-  [ (* An example test case. If you have trouble writing test cases of the
-       proper form, you can try copying this one and modifying it. Note that you
-       are *only* required to write tests for Rec, Fn, and Apply! *)
-    ( ( (I 1, "x")
-      , (* [1/x] *)
-        (* let y = 2 in y + x *)
-        Let ("y", I 2, Primop (Plus, [Var "y"; Var "x"])) )
-    , (* let y = 2 in y + 1 *)
-      Let ("y", I 2, Primop (Plus, [Var "y"; I 1])) ) ]
+  [ ( ((I 1, "x"), Let ("y", I 2, Primop (Plus, [Var "y"; Var "x"])))
+    , Let ("y", I 2, Primop (Plus, [Var "y"; I 1])) ) ]
 
-(* TODO: Implement the missing cases of subst. *)
 let rec subst ((e', x) as s) exp =
   match exp with
   | Var y ->
@@ -82,7 +72,5 @@ and rename_all names exp =
       let name', exp' = rename name exp in
       (name' :: names, exp') )
     names ([], exp)
-
-(* Applying a list of substitutions to an expression, leftmost first *)
 
 let subst_list subs exp = List.fold_left (fun exp sub -> subst sub exp) exp subs

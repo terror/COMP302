@@ -6,12 +6,9 @@ let free_variables_tests =
   ; (Rec ("f", Int, Apply (Var "f", [I 1])), [])
   ; (Let ("y", Primop (Plus, [Var "x"; I 1]), Var "y"), ["x"]) ]
 
-let rec free_variables : exp -> name list =
-  let union l1 l2 = delete l2 l1 @ l2 in
-  let union_fvs es =
-    List.fold_left (fun acc exp -> union acc (free_variables exp)) [] es
-  in
-  function
+let union l1 l2 = delete l2 l1 @ l2
+
+let rec free_variables : exp -> name list = function
   | Var y ->
       [y]
   | I _ | B _ ->
@@ -29,11 +26,19 @@ let rec free_variables : exp -> name list =
   | Apply (e, es) ->
       union_fvs ([e] @ es)
 
+and union_fvs es =
+  List.fold_left (fun acc exp -> union acc (free_variables exp)) [] es
+
 (* Question 2 *)
 
 let subst_tests : (((exp * name) * exp) * exp) list =
-  [ ( ((I 1, "x"), Let ("y", I 2, Primop (Plus, [Var "y"; Var "x"])))
-    , Let ("y", I 2, Primop (Plus, [Var "y"; I 1])) ) ]
+  [ (* Function doesn't replace bound variables *)
+    (((I 1, "x"), Fn ([("x", Int)], Var "x")), Fn ([("x", Int)], Var "x"))
+  ; (* Apply general case *)
+    (((I 1, "x"), Apply (Var "x", [I 1])), Apply (I 1, [I 1]))
+  ; (* Rec general case *)
+    ( ((I 1, "x"), Rec ("f", Int, Primop (Times, [Var "x"; Var "f"])))
+    , Rec ("f", Int, Primop (Times, [I 1; Var "f"])) ) ]
 
 let rec subst ((e', x) as s) exp =
   match exp with

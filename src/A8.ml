@@ -32,13 +32,13 @@ and union_fvs es =
 (* Question 2 *)
 
 let subst_tests : (((exp * name) * exp) * exp) list =
-  [ (* Rec general case *)
-    ( ((I 1, "x"), Rec ("f", Int, Primop (Times, [Var "x"; Var "f"])))
+  [ ( ((I 1, "x"), Rec ("f", Int, Primop (Times, [Var "x"; Var "f"])))
     , Rec ("f", Int, Primop (Times, [I 1; Var "f"])) )
-  ; (* Function doesn't substitute bound variables *)
-    (((I 1, "x"), Fn ([("x", Int)], Var "x")), Fn ([("x", Int)], Var "x"))
-  ; (* Apply general case *)
-    (((I 1, "x"), Apply (Var "x", [I 1])), Apply (I 1, [I 1])) ]
+  ; ( ((I 1, "f"), Rec ("f", Int, Primop (Times, [Var "x"; Var "f"])))
+    , Rec ("f", Int, Primop (Times, [Var "x"; Var "f"])) )
+  ; (((I 1, "y"), Fn ([("x", Int)], Var "y")), Fn ([("x", Int)], I 1))
+  ; (((I 1, "x"), Fn ([("x", Int)], Var "x")), Fn ([("x", Int)], Var "x"))
+  ; (((I 1, "x"), Apply (Var "x", [I 1])), Apply (I 1, [I 1])) ]
 
 let rec subst ((e', x) as s) exp =
   match exp with
@@ -61,12 +61,27 @@ let rec subst ((e', x) as s) exp =
         in
         Let (y, e1', subst s e2)
   | Rec (y, t, e) ->
-      Rec (y, t, subst s e)
+      if y = x then Rec (y, t, e)
+      else
+        let _, e' = rename_all (free_variables e') e in
+        Rec (y, t, subst s e')
   | Fn (xs, e) ->
-      Fn (xs, if List.mem x (List.map fst xs) then e else subst s e)
+      if List.mem x (List.map fst xs) then Fn (xs, e)
+      else
+        let _, e' = rename_all (free_variables e') e in
+        Fn (xs, subst s e')
   | Apply (e, es) ->
       Apply (subst s e, List.map (fun e -> subst s e) es)
 
 and rename x e =
   let x' = freshVar x in
   (x', subst (Var x', x) e)
+
+and rename_all names exp =
+  List.fold_right
+    (fun name (names, exp) ->
+      let name', exp' = rename name exp in
+      (name' :: names, exp') )
+    names ([], exp)
+
+and subst_list subs exp = List.fold_left (fun exp sub -> subst sub exp) exp subs

@@ -36,9 +36,14 @@ let subst_tests : (((exp * name) * exp) * exp) list =
     , Rec ("f", Int, Primop (Times, [I 1; Var "f"])) )
   ; ( ((I 1, "f"), Rec ("f", Int, Primop (Times, [Var "x"; Var "f"])))
     , Rec ("f", Int, Primop (Times, [Var "x"; Var "f"])) )
+  ; ( ((Var "f", "x"), Rec ("f", Int, Primop (Times, [Var "x"; Var "f"])))
+    , Rec ("g", Int, Primop (Times, [Var "f"; Var "g"])) )
   ; (((I 1, "y"), Fn ([("x", Int)], Var "y")), Fn ([("x", Int)], I 1))
   ; (((I 1, "x"), Fn ([("x", Int)], Var "x")), Fn ([("x", Int)], Var "x"))
-  ; (((I 1, "x"), Apply (Var "x", [I 1])), Apply (I 1, [I 1])) ]
+  ; (((Var "x", "y"), Fn ([("x", Int)], Var "y")), Fn ([("z", Int)], Var "x"))
+  ; (((I 1, "x"), Apply (Var "x", [I 1])), Apply (I 1, [I 1]))
+  ; (((I 1, "x"), Apply (Var "x", [Var "x"; Var "x"])), Apply (I 1, [I 1; I 1]))
+  ]
 
 let rec subst ((e', x) as s) exp =
   match exp with

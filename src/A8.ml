@@ -45,32 +45,6 @@ let subst_tests : (((exp * name) * exp) * exp) list =
   ; (((I 1, "x"), Apply (Var "x", [Var "x"; Var "x"])), Apply (I 1, [I 1; I 1]))
   ]
 
-exception ZipMismatchedLength
-
-let rec zip lists =
-  match lists with
-  | [], [] ->
-      []
-  | h1 :: t1, h2 :: t2 ->
-      (h1, h2) :: zip (t1, t2)
-  | _, _ ->
-      raise ZipMismatchedLength
-
-exception MergeMissingSubs
-
-let rec merge all free subs =
-  match all with
-  | [] ->
-      []
-  | ((n, _) as x) :: xs ->
-      if List.mem n free then
-        match subs with
-        | [] ->
-            raise MergeMissingSubs
-        | x' :: xs' ->
-            x' :: merge xs free xs'
-      else x :: merge xs free subs
-
 let rec subst ((e', x) as s) exp =
   match exp with
   | Var y ->
@@ -92,21 +66,11 @@ let rec subst ((e', x) as s) exp =
         in
         Let (y, e1', subst s e2)
   | Rec (y, t, e) ->
-      if y = x then Rec (y, t, e)
-      else if List.mem y (free_variables e') then
-        let y', e'' = rename y e in
-        Rec (y', t, subst s e'')
-      else Rec (y, t, subst s e)
+      let y', exp = rename y e in
+      Rec (y', t, subst s exp)
   | Fn (xs, e) ->
-      if List.mem x (List.map fst xs) then Fn (xs, e)
-      else
-        let xs'' =
-          List.filter (fun (y, _) -> List.mem y (free_variables e')) xs
-        in
-        let xs', e'' = rename_all (List.map fst xs'') e in
-        Fn
-          ( merge xs (free_variables e') (zip (xs', List.map snd xs''))
-          , subst s e'' )
+      let xs', exp = rename_all (List.map fst xs) e in
+      Fn (List.combine xs' (List.map snd xs), subst s exp)
   | Apply (e, es) ->
       Apply (subst s e, List.map (fun e -> subst s e) es)
 

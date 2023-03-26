@@ -38,6 +38,11 @@ let infer_tests : ((ctx * exp) * tp) list =
   ; (([], Apply (Fn ([("x", Int)], Primop (Plus, [Var "x"; I 1])), [I 42])), Int)
   ; (([], Apply (Fn ([("x", Bool)], If (Var "x", I 1, I 0)), [B true])), Int)
   ; ( ( []
+      , Apply
+          ( Fn ([("x", Int); ("y", Bool)], If (Var "y", Var "x", I 0))
+          , [I 42; B true] ) )
+    , Int )
+  ; ( ( []
       , Rec
           ( "f"
           , Arrow ([Int], Int)
@@ -59,18 +64,34 @@ let rec infer (ctx : ctx) (e : exp) : tp =
       Int
   | B _ ->
       Bool
-  | Var x ->
-      (* Look up `x` in ctx, raise FreeVariable if its not present *)
-      raise NotImplemented
+  | Var x -> (
+    match List.filter (fun (x', _) -> x = x') ctx with
+    | [(_, y)] ->
+        y
+    | _ ->
+        raise FreeVariable )
   | Primop (op, es) ->
       infer_op op (List.map (infer ctx) es)
-  | If (cond, e1, e2) ->
-      raise NotImplemented
+  | If (cond, e1, e2) -> (
+    match infer ctx cond with
+    | Bool ->
+        let a = infer ctx e1 in
+        let b = infer ctx e2 in
+        if a = b then a else raise TypeMismatch
+    | _ ->
+        raise TypeMismatch )
   | Let (x, e1, e2) ->
-      raise NotImplemented
+      infer ((x, infer ctx e1) :: ctx) e2
   | Fn (xs, e') ->
-      raise NotImplemented
-  | Apply (e', args) ->
-      raise NotImplemented
+      Arrow (List.map snd xs, infer (xs @ ctx) e')
+  | Apply (e', args) -> (
+    match infer ctx e' with
+    | Arrow (arg_types, ret) ->
+        if List.length arg_types = List.length args then
+          if arg_types = List.map (infer ctx) args then ret
+          else raise TypeMismatch
+        else raise ArityMismatch
+    | _ ->
+        raise TypeMismatch )
   | Rec (f, t, e') ->
-      raise NotImplemented
+      if t = infer ((f, t) :: ctx) e' then t else raise TypeMismatch

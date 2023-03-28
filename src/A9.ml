@@ -35,12 +35,12 @@ let infer_tests : ((ctx * exp) * tp) list =
   [ (([], Fn ([("x", Int)], Primop (Plus, [Var "x"; I 1]))), Arrow ([Int], Int))
   ; ( ([], Fn ([("x", Bool); ("y", Int)], If (Var "x", Var "y", I 0)))
     , Arrow ([Bool; Int], Int) )
-  ; (([], Apply (Fn ([("x", Int)], Primop (Plus, [Var "x"; I 1])), [I 42])), Int)
+  ; (([], Apply (Fn ([("x", Int)], Primop (Plus, [Var "x"; I 1])), [I 1])), Int)
   ; (([], Apply (Fn ([("x", Bool)], If (Var "x", I 1, I 0)), [B true])), Int)
   ; ( ( []
       , Apply
           ( Fn ([("x", Int); ("y", Bool)], If (Var "y", Var "x", I 0))
-          , [I 42; B true] ) )
+          , [I 1; B true] ) )
     , Int )
   ; ( ( []
       , Rec
@@ -56,7 +56,9 @@ let infer_tests : ((ctx * exp) * tp) list =
                       , [ Var "x"
                         ; Apply (Var "f", [Primop (Minus, [Var "x"; I 1])]) ] )
                   ) ) ) )
-    , Arrow ([Int], Int) ) ]
+    , Arrow ([Int], Int) )
+  ; (([], Apply (Fn ([], Primop (Plus, [I 2; I 3])), [])), Int)
+  ; (([], Fn ([], Primop (Plus, [I 2; I 3]))), Arrow ([], Int)) ]
 
 let rec infer (ctx : ctx) (e : exp) : tp =
   match e with
@@ -65,11 +67,7 @@ let rec infer (ctx : ctx) (e : exp) : tp =
   | B _ ->
       Bool
   | Var x -> (
-    match List.filter (fun (x', _) -> x = x') ctx with
-    | [(_, y)] ->
-        y
-    | _ ->
-        raise FreeVariable )
+    match List.assoc_opt x ctx with Some y -> y | None -> raise FreeVariable )
   | Primop (op, es) ->
       infer_op op (List.map (infer ctx) es)
   | If (cond, e1, e2) -> (

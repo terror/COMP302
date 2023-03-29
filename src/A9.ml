@@ -1,3 +1,37 @@
+(* Types in MiniCAML *)
+type tp =
+  | Arrow of tp list * tp (* function type: S1 S2 ... Sn -> T *)
+  | Int
+  | Bool
+
+(* Used for variables, aka "identifiers" *)
+type name = string
+
+(* The primitive operations available in MiniCAML *)
+type primop = Equals | LessThan | Plus | Minus | Times | Negate
+
+(* Expressions in MiniCAML *)
+type exp =
+  | I of int (* 0 | 1 | 2 | ... *)
+  | B of bool (* true | false *)
+  | If of exp * exp * exp (* if e then e1 else e2 *)
+  | Primop of primop * exp list (* e1 <op> e2 or <op> e *)
+  | Fn of (name * tp) list * exp (* fn (x_1: t_1, ..., x_n: t_n) => e *)
+  | Rec of name * tp * exp (* rec (f: t) => e *)
+  | Let of name * exp * exp (* let x = e1 in e2 end *)
+  | Apply of exp * exp list (* e (e_1, e_2, ..., e_n) *)
+  | Var of name (* x *)
+
+(* Context is simply a list of variable names and their types *)
+type ctx = (name * tp) list
+
+(* Exceptions to raise in type inference *)
+exception ArityMismatch
+
+exception TypeMismatch
+
+exception FreeVariable
+
 (* Question 1 *)
 
 let infer_op (op : primop) (ts : tp list) : tp =

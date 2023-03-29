@@ -1,3 +1,50 @@
+(* Types in MiniCAML *)
+type tp =
+  | Arrow of tp list * tp (* function type: S1 S2 ... Sn -> T *)
+  | Int
+  | Bool
+
+(* Used for variables, aka "identifiers" *)
+type name = string
+
+(* The primitive operations available in MiniCAML *)
+type primop = Equals | LessThan | Plus | Minus | Times | Negate
+
+(* Expressions in MiniCAML *)
+type exp =
+  | I of int (* 0 | 1 | 2 | ... *)
+  | B of bool (* true | false *)
+  | If of exp * exp * exp (* if e then e1 else e2 *)
+  | Primop of primop * exp list (* e1 <op> e2 or <op> e *)
+  | Fn of (name * tp) list * exp (* fn (x_1: t_1, ..., x_n: t_n) => e *)
+  | Rec of name * tp * exp (* rec (f: t) => e *)
+  | Let of name * exp * exp (* let x = e1 in e2 end *)
+  | Apply of exp * exp list (* e (e_1, e_2, ..., e_n) *)
+  | Var of name (* x *)
+
+(* Deletes every occurence of the elements of xs from l. e.g. delete [w; y] [y;
+   x; y; z; w] = [x; z] *)
+let delete (xs : 'a list) (l : 'a list) : 'a list =
+  List.filter (fun x -> not (List.mem x xs)) l
+
+(* Generating fresh (new) variable names *)
+type gen_var =
+  { fresh: name -> name (* generates a fresh name based on a given one. *)
+  ; reset: unit -> unit (* resets the internal counter for making names. *) }
+
+let gen_var : gen_var =
+  let counter = ref 0 in
+  let fresh x =
+    incr counter ;
+    x ^ string_of_int !counter
+  in
+  let reset () = counter := 0 in
+  {fresh; reset}
+
+let freshVar = gen_var.fresh
+
+let resetCtr = gen_var.reset
+
 (* Question 1 *)
 
 let free_variables_tests =
